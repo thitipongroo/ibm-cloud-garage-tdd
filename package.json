@@ -1,27 +1,31 @@
 {
   "name": "ibm-cloud-garage-tdd",
   "version": "1.0.0",
-  "description": "0. Clone this git repository     * In your profile > settings > SSH Keys confirm you have set up an SSH Key for Github. If not, then set up SSH access to github. [Connecting to GitHub with SSH](https://help.github.com/enterprise/2.6/user/articles/connecting-to-github-with-ssh/)",
-  "main": "index.js",
+  "description": "TDD exercises from IBM Cloud Garage — Jest + Babel on Node.js",
+  "private": true,
   "scripts": {
     "test": "jest --verbose",
+    "test:coverage": "jest --verbose --coverage",
     "tdd": "jest --verbose --watch --onlyChanged",
-    "precommit": "npm test"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thitipongro/ibm-cloud-garage-tdd.git"
+    "url": "git+https://github.com/thitipongroo/ibm-cloud-garage-tdd.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/thitipongro/ibm-cloud-garage-tdd/issues"
-  },
-  "homepage": "https://github.com/thitipongro/ibm-cloud-garage-tdd#readme",
+  "author": "Thitipong Roongpraser",
+  "license": "MIT",
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
-    "husky": "^4.3.0",
-    "jest": "^26.4.2"
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "husky": "^9.1.0",
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "server/**/*.js",
+      "!server/**/*.spec.js"
+    ]
   }
 }
