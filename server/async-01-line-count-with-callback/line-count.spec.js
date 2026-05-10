@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-const filename = 'server/async-01-line-count-with-callback/line-count.js';
+const { lineCount } = require('./line-count');
 
 describe('line count', () => {
   it.todo('for file —— line-count.js —— should be 12');

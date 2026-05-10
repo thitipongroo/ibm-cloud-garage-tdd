@@ -1,4 +1,4 @@
-// import modules
+const { fahrenheitToCelsius } = require('./fahrenheit-2-celsius');
 
 describe('the fahrenheit-2-celsius canary spec', () => {
   it('shows the infrastructure works', () => {

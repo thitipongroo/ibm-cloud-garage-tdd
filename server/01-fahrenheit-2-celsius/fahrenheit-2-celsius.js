@@ -1,3 +1,3 @@
-const fahrenheitToCelsius = () => { };
+const fahrenheitToCelsius = (fahrenheit) => { };
 
-export default { fahrenheitToCelsius };
+module.exports = { fahrenheitToCelsius };
