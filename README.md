@@ -1,119 +1,195 @@
 # IBM Cloud Garage — TDD Exercises
 
-A hands-on TDD workshop using **Jest** and **Babel** on Node.js.
+[![Tests](https://img.shields.io/badge/tests-Jest%2029-green)](https://jestjs.io)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
+
+A hands-on TDD workshop using **Jest 29** and **Babel** on Node.js, following the Four Rules of Simple Design and the Transformation Priority Premise.
 
 ---
 
-## Set up your project
+## Architecture
 
-### 1. Clone the repository
+```text
+Developer commits code
+         │
+         ▼ git commit
+  ┌──────────────────┐
+  │  Husky pre-commit │  ← blocks commit on failure
+  │   hook (npm test) │
+  └────────┬─────────┘
+           │ passes
+           ▼
+  ┌──────────────────────────────┐
+  │         Jest 29 Runner       │
+  │                              │
+  │  *.spec.js / *.test.js       │
+  │  __tests__/ directories      │
+  │                              │
+  │  Babel transpiles ES2015+    │
+  │  to CommonJS on the fly      │
+  └────────────┬─────────────────┘
+               │
+       ┌───────┴──────────┐
+       ▼                  ▼
+  Test Results       Coverage Report
+  (stdout)           (lcov / text)
+  PASS / FAIL        server/**/*.js
+```
+
+---
+
+## Tech Stack
+
+| Tool | Version | Why |
+| ---- | ------- | --- |
+| [Jest](https://jestjs.io) | ^29.x | Batteries-included: runner, assertions, mocks, coverage — no glue config needed |
+| [@babel/preset-env](https://babeljs.io) | ^7.x | Transpiles modern JS (`import`/`export`, optional chaining) to what the Node target supports |
+| [Husky](https://typicode.github.io/husky) | ^9.x | Hooks are installed automatically on `npm install` via the `prepare` script — no manual setup |
+
+**Why Jest over Mocha/Chai?**
+Mocha requires wiring in a separate assertion library (Chai) and a coverage tool (nyc). Jest ships all three plus snapshot testing and fake timers in one dependency. For a workshop that should start immediately, Jest removes friction.
+
+---
+
+## Project Structure
+
+```text
+ibm-cloud-garage-tdd/
+├── server/
+│   ├── 00-canary/
+│   │   └── canary.spec.js          # Sanity test — confirm Jest is working
+│   ├── 01-*/                       # Exercises 01–N, one directory each
+│   │   ├── *.js                    # Implementation file
+│   │   └── *.spec.js               # Test file
+│   └── ...
+├── .babel.config.json              # { "presets": ["@babel/preset-env"] }
+├── .husky/
+│   └── pre-commit                  # npm test
+├── .nvmrc                          # Pins Node version (≥20)
+└── package.json
+```
+
+---
+
+## System Flow
+
+```text
+1. Clone repo & npm install
+      ↓ Husky installs .husky/pre-commit hook automatically
+2. Open an exercise directory (server/NN-*)
+3. Read the failing spec → understand the requirement
+4. Write the minimum implementation to make it pass (Red → Green)
+5. Refactor without breaking tests (Green → Refactor)
+6. git commit
+      ↓ Husky pre-commit fires npm test
+      ↓ All tests must pass before commit is accepted
+7. Repeat for the next exercise
+```
+
+---
+
+## Running Tests
+
+| Command | Description |
+| ------- | ----------- |
+| `npm test` | Run all tests once — use before committing or in CI |
+| `npm run tdd` | Watch mode — reruns only tests related to changed files |
+| `npm run test:coverage` | Run all tests and generate a coverage report |
+
+---
+
+## Setup
+
+### 1. Clone
 
 ```bash
 git clone git@github.com:thitipongroo/ibm-cloud-garage-tdd.git
 cd ibm-cloud-garage-tdd
 ```
 
-If you haven't set up SSH access to GitHub yet, follow [Connecting to GitHub with SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
+### 2. Install Node.js (v20+)
 
-### 2. Install Node.js (v20 or above)
+```bash
+# Mac / Linux — nvm picks the version from .nvmrc
+nvm use
 
-- **Mac/Linux:** Install [nvm](https://github.com/nvm-sh/nvm), then run `nvm use` in the project directory (the `.nvmrc` file pins the version automatically).
-- **Windows:** Download and install Node.js from [nodejs.org](https://nodejs.org/en/download/).
+# Windows — download from nodejs.org
+```
 
 ### 3. Install dependencies
 
 ```bash
-npm install
+npm install   # also installs Husky pre-commit hook
 ```
 
-This installs Jest, Babel, and Husky — everything you need is already configured in `package.json`.
+---
+
+## Pre-commit Hook
+
+Husky enforces a quality gate on every commit:
+
+```bash
+# .husky/pre-commit
+npm test
+```
+
+If any test fails, the commit is rejected. The hook is installed automatically on `npm install` — no extra setup needed.
 
 ---
 
-## Running tests
-
-| Command | Description |
-| --- | --- |
-| `npm test` | Run all tests once (use this in CI / before committing) |
-| `npm run tdd` | Watch mode — reruns tests related to changed files |
-| `npm run test:coverage` | Run all tests and generate a coverage report |
-
----
-
-## Pre-commit hooks
-
-Husky is already configured. A `pre-commit` hook runs `npm test` automatically before every commit, preventing broken code from being committed.
-
-No additional setup is required — the hook is installed when you run `npm install`.
-
----
-
-## Configure your IDE
+## IDE Configuration
 
 ### VS Code
 
-Install the [Jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) extension for inline test results and run/debug support.
+Install the [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) for inline pass/fail indicators and one-click run/debug per test.
 
 ### IntelliJ / WebStorm
 
-In **Preferences**:
-
-1. Under **Language & Frameworks > JavaScript**, set the JavaScript language version to **ECMAScript 6**.
-2. Under **Language & Frameworks > JavaScript > Libraries**, download and enable both `jest` and `node`.
+1. **Preferences → Language & Frameworks → JavaScript** — set version to **ECMAScript 6**.
+2. **Preferences → Language & Frameworks → JavaScript → Libraries** — download and enable `jest` and `node`.
 
 ---
 
-## Explore the canary test
+## TDD Principles in Practice
 
-Open `server/00-canary/canary.spec.js` and note:
+### Four Rules of Simple Design (Kent Beck)
 
-1. Jest discovers test files named with a `.spec.js` or `.test.js` extension, or placed in a `__tests__` folder.
+1. **Passes the tests** — code does what the tests say
+2. **Reveals intention** — names communicate purpose
+3. **No duplication** — DRY at the logic level
+4. **Fewest elements** — no premature abstractions
 
-2. `describe` groups related tests into a suite. Suites can be nested.
+### Transformation Priority Premise (Uncle Bob)
 
-3. `it` takes a description string and a function containing the test expectations.
+Apply transformations in this order — simpler transformations first:
 
-4. `expect` gives you access to **matchers** that let you validate values. See the [Jest matchers docs](https://jestjs.io/docs/expect) for the full list.
+```text
+(1) constant       a literal value
+(2) scalar         a variable or argument
+(3) invocation     calling a function
+(4) conditional    if / switch / case
+(5) while loop     for loops too
+(6) assignment     mutating a variable's value
+```
 
-5. The descriptions in `describe` and `it` blocks are combined in the test output — name them so the output reads like a requirements spec.
+Prefer a higher-priority transformation when multiple can make a test pass — the result is simpler code.
 
 ---
 
-## Let's get started
+## Tradeoffs
 
-Work through the exercises in order, applying the **Four Rules of Simple Design** and the **Transformation Priority Premise** as you go.
+| Decision | Alternative | Reasoning |
+| -------- | ----------- | --------- |
+| `--onlyChanged` in watch mode | Run full suite | Speeds up the red-green-refactor loop during active development |
+| Babel transpilation | Native ESM with `--experimental-vm-modules` | Babel is stable and well-supported in Jest 29; native ESM in Jest is still maturing |
+| Husky pre-commit blocks commit | CI-only quality gate | Catches failures locally before they hit the remote — faster feedback loop for a workshop |
 
-### [The Four Rules of Simple Design](https://martinfowler.com/bliki/BeckDesignRules.html)
+---
 
-- **Passes the tests**
-- **Reveals intention**
-- **No duplication**
-- **Fewest elements**
+## Scaling Considerations
 
-### [Transformation Priority Premise](https://8thlight.com/blog/uncle-bob/2013/05/27/TheTransformationPriorityPremise.html)
-
-```text
-(01) [{} –> nil]          no code => return nil
-(02) [nil->constant]      nil => simple constant
-(03) [constant->constant+] simple constant => complex constant
-(04) [constant->scalar]   complex constant => variable or argument
-(05) [statement->statements] adding unconditional statements
-(06) [unconditional->if]  splitting the execution path
-(07) [scalar->array]
-(08) [array->container]
-(09) [statement->recursion]
-(10) [if->while]
-(11) [expression->function] replacing an expression with a function or algorithm
-(12) [variable->assignment] replacing the value of a variable
-```
-
-### [Simplified Transformation Priority Premise](https://8thlight.com/blog/micah-martin/2012/11/17/transformation-priority-premise-applied.html)
-
-```text
-(01) constant    => a value
-(02) scalar      => a local binding, or variable
-(03) invocation  => calling a function/method
-(04) conditional => if/switch/case/cond
-(05) while loop  => applies to for loops as well
-(06) assignment  => replacing the value of a variable
-```
+| Concern | Approach |
+| ------- | -------- |
+| Slow test suite as exercises grow | `jest --maxWorkers=50%` runs suites in parallel across CPU cores |
+| Pinning Node version across machines | `.nvmrc` + nvm ensures consistent runtime — add a CI node-version matrix to catch regressions |
+| Coverage regression | Add `coverageThreshold` in `package.json` to block merges below a minimum line coverage |
